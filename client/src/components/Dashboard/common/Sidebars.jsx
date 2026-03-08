@@ -14,8 +14,8 @@ import { NavLink } from "react-router-dom";
 const Sidebars = () => {
   const { user } = useAuth();
   
-  // Don't render sidebar for parent role as it has its own integrated sidebar
-  if (user?.role === "parent") {
+  // Don't render sidebar for parent or teacher roles as they have their own integrated sidebars
+  if (user?.role === "parent" || user?.role === "teacher") {
     return null;
   }
   

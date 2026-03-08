@@ -12,7 +12,7 @@ import { Icons } from "@/constants/Icons";
 import { useForm } from "react-hook-form";
 
 import { useNavigate } from "react-router-dom";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -37,113 +37,134 @@ const Login = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-      <div className="flex flex-col space-y-2 text-center">
-        <h1 className="text-2xl flex items-center justify-center gap-4 font-grotesk font-semibold tracking-tight">
-          <span>Login to account </span>
-          <KeyRound />
-          {/* <LogInIcon /> */}
-        </h1>
-        <p className="text-sm font-grotesk font-medium tracking-normal text-muted-foreground">
-          Enter your email and password below to login to your account
-        </p>
-
-        <div className={"grid gap-6"}>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)}>
-              <div className="grid gap-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="example@example.com"
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="sr-only">Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="password"
-                          placeholder="password"
-                          type="password"
-                          autoCapitalize="none"
-                          autoComplete="password"
-                          autoCorrect="off"
-                          disabled={isPending}
-                          {...field}
-                          value={field.value || ""}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button disabled={isPending}>
-                  {isPending && (
-                    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Sign In with Email
-                </Button>
-              </div>
-              <p className="text-xs mt-3 text-red-600">
-                NOTE: The backend server may take up to a minute to respond on
-                the first request after being inactive.
-              </p>
-              <p className="text-xs mt-3 text-red-600">
-                For optimal testing, please use the live hosted links whenever
-                possible. Using local development links may lead to
-                `refreshToken` issues due to cookie security restrictions.
-              </p>
-              <br />
-              <p className="text-xs">
-                For testing purposes, here are some sample credentials:
-              </p>
-              <p className="text-xs mt-1 text-red-600">
-                <strong>Teacher:</strong> demo@test.com / test123
-              </p>
-              <p className="text-xs mt-1 text-red-600">
-                <strong>School:</strong> school@test.com / test123
-              </p>
-              <p className="text-xs mt-1 text-red-600">
-                <strong>Parent:</strong> parent@test.com / test123
-              </p>
-            </form>
-          </Form>
-
-          {/* <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
+    <div className="mx-auto flex w-full flex-col justify-center space-y-8 sm:w-[400px] p-6">
+      {/* Header */}
+      <div className="flex flex-col space-y-4 text-center">
+        <div className="flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-[#6C5CE7] to-[#5A4FCF] rounded-2xl flex items-center justify-center shadow-lg">
+            <KeyRound className="w-8 h-8 text-white" />
           </div>
-          <Button variant="outline" type="button" disabled={isPending}>
-            {isPending ? (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Icons.google className="mr-2 h-4 w-4" />
-            )}
-            Google
-          </Button> */}
         </div>
+        
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+          Welcome Back
+        </h1>
+        <p className="text-gray-600 text-base">
+          Sign in to your GravITy account to continue
+        </p>
+      </div>
+
+      {/* Login Form */}
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        placeholder="Enter your email"
+                        className="pl-10 h-12 border-gray-200 focus:border-[#6C5CE7] focus:ring-[#6C5CE7] rounded-xl"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <Input
+                        placeholder="Enter your password"
+                        type="password"
+                        className="pl-10 h-12 border-gray-200 focus:border-[#6C5CE7] focus:ring-[#6C5CE7] rounded-xl"
+                        autoCapitalize="none"
+                        autoComplete="password"
+                        autoCorrect="off"
+                        disabled={isPending}
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button 
+              disabled={isPending} 
+              className="w-full h-12 bg-gradient-to-r from-[#6C5CE7] to-[#5A4FCF] hover:from-[#5A4FCF] to-[#4C43D4] text-white font-medium rounded-xl shadow-lg transition-all duration-200"
+            >
+              {isPending && (
+                <Icons.spinner className="mr-2 h-5 w-5 animate-spin" />
+              )}
+              {isPending ? "Signing In..." : "Sign In"}
+            </Button>
+          </form>
+        </Form>
+      </div>
+
+      {/* Server Notice */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <p className="text-sm text-amber-800 font-medium mb-2">
+          ⚠️ Server Notice
+        </p>
+        <p className="text-xs text-amber-700 mb-2">
+          The backend server may take up to a minute to respond on the first request after being inactive.
+        </p>
+        <p className="text-xs text-amber-700">
+          For optimal testing, please use the live hosted links whenever possible.
+        </p>
+      </div>
+
+      {/* Test Credentials */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <p className="text-sm text-blue-800 font-medium mb-3">
+          🧪 Test Credentials
+        </p>
+        <div className="space-y-2 text-xs">
+          <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+            <span className="font-medium text-purple-700">Teacher:</span>
+            <span className="text-gray-600">demo@test.com / test123</span>
+          </div>
+          <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+            <span className="font-medium text-blue-700">School:</span>
+            <span className="text-gray-600">school@test.com / test123</span>
+          </div>
+          <div className="flex justify-between items-center p-2 bg-white rounded-lg">
+            <span className="font-medium text-green-700">Parent:</span>
+            <span className="text-gray-600">parent@test.com / test123</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Admin Login Link */}
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Are you an administrator?{" "}
+          <button
+            onClick={() => navigate("/admin/login")}
+            className="text-[#6C5CE7] hover:text-[#5A4FCF] font-medium underline"
+          >
+            Admin Login
+          </button>
+        </p>
       </div>
     </div>
   );

@@ -28,7 +28,7 @@ const userSchema = new Schema({
   password: { type: String },
   role: {
     type: String,
-    enum: ["admin", "recruiter", "jobSeeker"],
+    enum: ["admin", "recruiter", "jobSeeker", "parent"],
     default: "jobSeeker",
   },
   isVerified: { type: Boolean, default: false },
@@ -87,3 +87,6 @@ export const Project = model("Project", projectSchema);
 export const Experience = model("Experience", experienceSchema);
 export const Education = model("Education", educationSchema);
 export const User = model("User", userSchema);
+
+// Default export for backward compatibility
+export default User;

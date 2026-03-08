@@ -1,26 +1,15 @@
 import React from "react";
 import { 
-  Search, 
-  Bell, 
-  MessageSquare, 
-  User,
   Users,
-  BookOpen,
   Calendar,
   Star,
   MapPin,
-  Video,
-  Heart,
   ChevronRight,
-  Home,
-  Sparkles,
-  Bookmark,
-  ClipboardList,
-  CreditCard,
-  Settings,
-  Menu
+  User,
+  MessageSquare,
+  Loader2
 } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 // Mock data matching the reference design
 const statsData = [
@@ -28,67 +17,6 @@ const statsData = [
   { title: "Active Tutors", value: "1", gradient: "from-[#4FA3F7] to-[#60B7FF]", icon: Users },
   { title: "Upcoming Classes", value: "3", gradient: "from-[#20C997] to-[#34D399]", icon: Calendar },
   { title: "Messages", value: "12", gradient: "from-[#84CC16] to-[#A3E635]", icon: MessageSquare },
-];
-
-const chartData = [
-  { name: 'Week 01', requests: 30, demos: 25, confirmed: 15 },
-  { name: 'Week 02', requests: 45, demos: 35, confirmed: 25 },
-  { name: 'Week 03', requests: 35, demos: 30, confirmed: 20 },
-  { name: 'Week 04', requests: 50, demos: 40, confirmed: 30 },
-  { name: 'Week 05', requests: 40, demos: 35, confirmed: 25 },
-  { name: 'Week 06', requests: 60, demos: 45, confirmed: 35 },
-  { name: 'Week 07', requests: 55, demos: 50, confirmed: 40 },
-  { name: 'Week 08', requests: 70, demos: 55, confirmed: 45 },
-  { name: 'Week 09', requests: 65, demos: 60, confirmed: 50 },
-  { name: 'Week 10', requests: 80, demos: 65, confirmed: 55 },
-];
-
-const recommendedTeachers = [
-  {
-    id: 1,
-    name: "Rahul Sharma",
-    subject: "Physics Teacher",
-    experience: "5 Years Experience",
-    rating: 4.6,
-    location: "Hyderabad",
-    mode: "Online + Offline",
-    fee: "₹800/hour",
-    description: "Expert in JEE and NEET preparation with proven track record"
-  },
-  {
-    id: 2,
-    name: "Priya Singh",
-    subject: "Mathematics Teacher",
-    experience: "3 Years Experience",
-    rating: 4.8,
-    location: "Mumbai",
-    mode: "Online",
-    fee: "₹600/hour",
-    description: "Specialized in advanced mathematics and competitive exams"
-  },
-  {
-    id: 3,
-    name: "Amit Kumar",
-    subject: "Chemistry Teacher",
-    experience: "7 Years Experience",
-    rating: 4.7,
-    location: "Delhi",
-    mode: "Offline",
-    fee: "₹900/hour",
-    description: "Organic chemistry specialist with excellent results"
-  }
-];
-
-const upcomingClasses = [
-  { teacher: "Rahul Sharma", subject: "Physics", date: "Dec 15", time: "10:00 AM", mode: "Online", status: "Scheduled" },
-  { teacher: "Priya Singh", subject: "Math", date: "Dec 16", time: "2:00 PM", mode: "Offline", status: "Confirmed" },
-  { teacher: "Amit Kumar", subject: "Chemistry", date: "Dec 17", time: "4:00 PM", mode: "Online", status: "Pending" },
-];
-
-const recentMessages = [
-  { teacher: "Rahul Sharma", message: "Demo class available tomorrow", time: "2 min ago", unread: true },
-  { teacher: "Priya Singh", message: "Assignment completed successfully", time: "1 hour ago", unread: false },
-  { teacher: "Amit Kumar", message: "Next class rescheduled", time: "3 hours ago", unread: true },
 ];
 
 const ParentDashboard = () => {

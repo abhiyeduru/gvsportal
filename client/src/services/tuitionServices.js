@@ -15,6 +15,11 @@ export const getParentDashboardData = async () => {
     return data;
 };
 
+export const getMyTuitionRequests = async () => {
+    const { data } = await axiosInstance.get("/tuition/my-requests");
+    return data;
+};
+
 export const getTeacherTuitionDashboardData = async () => {
     const { data } = await axiosInstance.get("/tuition/teacher-dashboard");
     return data;

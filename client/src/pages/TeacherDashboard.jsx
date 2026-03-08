@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '@/lib/axiosInstance';
-import DashboardLayout from '@/components/Dashboard/TeacherDashboard/DashboardLayout';
+import TeacherLayout from '@/components/Dashboard/TeacherDashboard/TeacherLayout';
 import StatsGrid from '@/components/Dashboard/TeacherDashboard/StatsGrid';
 import ProfileCard from '@/components/Dashboard/TeacherDashboard/ProfileCard';
 import ActivityFeed from '@/components/Dashboard/TeacherDashboard/ActivityFeed';
@@ -62,16 +62,16 @@ const TeacherDashboard = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <TeacherLayout>
         <div className="flex items-center justify-center h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
         </div>
-      </DashboardLayout>
+      </TeacherLayout>
     );
   }
 
   return (
-    <DashboardLayout>
+    <TeacherLayout>
       <div className="p-6 space-y-6">
         {/* Stats Cards */}
         <StatsGrid stats={stats} />
@@ -92,7 +92,7 @@ const TeacherDashboard = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </TeacherLayout>
   );
 };
 

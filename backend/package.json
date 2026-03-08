@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "pm2 start index.js --name hirecrowd-api"
+    "dev": "nodemon index.js"
   },
   "type": "module",
   "keywords": [],
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "eslint": "^9.12.0",
+    "nodemon": "^3.1.14",
     "pnpm": "^9.12.2"
   }
 }

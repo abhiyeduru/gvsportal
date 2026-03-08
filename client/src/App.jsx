@@ -17,36 +17,83 @@ import { useEffect } from "react";
 
 import Layout from "./components/Dashboard/common/Layouts/Layout";
 import LoginRegisterLayout from "./components/Dashboard/common/Layouts/LoginRegisterLayout";
-
-
-import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import VerifyEmail from "./pages/VerifyEmail";
 
-import EmployerDashboard from "@/components/Dashboard/EmployerComponents/EmployerDashboard";
-import UserJobListings from "@/components/Dashboard/JobListings";
-import JobOpenings from "./components/Dashboard/EmployerComponents/JobOpenings";
+// Test Page
+import TestPage from "./pages/TestPage";
+
+// Admin Components
+import AdminLogin from "./pages/AdminLogin";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminTeachers from "./pages/admin/AdminTeachers";
+import AdminSchools from "./pages/admin/AdminSchools";
+import AdminJobs from "./pages/admin/AdminJobs";
+import AdminApplications from "./pages/admin/AdminApplications";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AdminPayments from "./pages/admin/AdminPayments";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import AdminNotifications from "./pages/admin/AdminNotifications";
+import AdminSettings from "./pages/admin/AdminSettings";
+import { AdminAuthProvider } from "./hooks/useAdminAuth";
+
+// Landing Page
+import LandingPage from "./pages/LandingPage";
+
+// Profile Components
+import ProfilePage from "./pages/ProfilePage";
+import SchoolProfilePage from "./pages/SchoolProfilePage";
+
+// School Dashboard Components
+import SchoolDashboard from "@/pages/SchoolDashboard";
+import SchoolMessages from "@/components/Dashboard/SchoolDashboard/SchoolMessages";
+import SearchTeachers from "@/components/Dashboard/SchoolDashboard/SearchTeachers";
+import PostJob from "@/components/Dashboard/SchoolDashboard/PostJob";
+import JobPosts from "@/components/Dashboard/SchoolDashboard/JobPosts";
+import Applications from "@/components/Dashboard/SchoolDashboard/Applications";
+import Interviews from "@/components/Dashboard/SchoolDashboard/Interviews";
+import SchoolSavedTeachers from "@/components/Dashboard/SchoolDashboard/SavedTeachers";
+import Analytics from "@/components/Dashboard/SchoolDashboard/Analytics";
+import Login from "./pages/Login";
 import Settings from "./components/Dashboard/Settings";
 import Profile from "./components/Dashboard/Settings/Profile";
 import AppliedJobs from "./components/Dashboard/Settings/AppliedJobs";
 import Bookmarks from "./components/Dashboard/Settings/Bookmarks";
-import AdminDashboard from "./components/Dashboard/AdminDashboard";
+import AdminDashboardComponent from "./components/Dashboard/AdminDashboard";
 import Navbar from "./components/Dashboard/common/Navbar";
-import ParentDashboard from "@/components/Dashboard/ParentDashboard";
+
+// Parent Dashboard Components
+import ParentDashboard from "@/components/Dashboard/ParentDashboard/index.jsx";
+import FindTeachers from "@/components/Dashboard/ParentDashboard/FindTeachers";
+import RecommendedTeachers from "@/components/Dashboard/ParentDashboard/RecommendedTeachers";
+import SavedTeachers from "@/components/Dashboard/ParentDashboard/SavedTeachers";
+import MyTutors from "@/components/Dashboard/ParentDashboard/MyTutors";
+import TuitionRequests from "@/components/Dashboard/ParentDashboard/TuitionRequests";
+import Messages from "@/components/Dashboard/ParentDashboard/Messages";
+import DemoClasses from "@/components/Dashboard/ParentDashboard/DemoClasses";
+import Payments from "@/components/Dashboard/ParentDashboard/Payments";
+import ProfileSettings from "@/components/Dashboard/ParentDashboard/ProfileSettings";
 import TutorListings from "@/components/Dashboard/JobListings/TutorListings";
-import TeacherTuitions from "@/components/Dashboard/TeacherTuitions";
-import TeacherDashboardOverview from "@/components/Dashboard/TeacherDashboardOverview";
-import ActiveStudentsPanel from "@/components/Dashboard/ActiveStudentsPanel";
-import EarningsDashboard from "@/components/Dashboard/EarningsDashboard";
-import DemoClassesPanel from "@/components/Dashboard/DemoClassesPanel";
+
+// Teacher Dashboard Components
+import TeacherDashboard from "@/pages/TeacherDashboard";
 import TeacherJobsPanel from "@/components/Dashboard/TeacherJobsPanel";
-import NotificationsPanel from "@/components/Dashboard/NotificationsPanel";
-import TeacherMessages from "@/components/Dashboard/TeacherMessages";
-import TeacherAnalytics from "@/components/Dashboard/TeacherAnalytics";
 import TeacherJobDetails from "@/components/Dashboard/TeacherJobDetails";
 import TeacherJobApplication from "@/components/Dashboard/TeacherJobApplication";
 import TeacherMyClasses from "@/components/Dashboard/TeacherMyClasses";
+import TeacherTuitions from "@/components/Dashboard/TeacherTuitions";
+import TeacherMessages from "@/components/Dashboard/TeacherMessages";
+import TeacherAnalytics from "@/components/Dashboard/TeacherAnalytics";
+import ActiveStudentsPanel from "@/components/Dashboard/ActiveStudentsPanel";
+import EarningsDashboard from "@/components/Dashboard/EarningsDashboard";
+import DemoClassesPanel from "@/components/Dashboard/DemoClassesPanel";
+import NotificationsPanel from "@/components/Dashboard/NotificationsPanel";
+
 import ProtectedRoute from "./ProtectedRoutes/ProtectedRoute";
 import RoleBasedRoute from "./ProtectedRoutes/RoleBasedRoute";
 import { useAuth } from "./hooks/useAuth";
@@ -59,7 +106,7 @@ function App() {
   useEffect(() => {
     if (isLoading) return;
 
-    const guestPaths = ["/", "/login", "/register"];
+    const guestPaths = ["/login", "/register"];
     const isGuestPath = guestPaths.includes(location.pathname);
 
     if (isAuthenticated && user?.role && isGuestPath) {
@@ -81,17 +128,145 @@ function App() {
       </div>
     );
 
-  const showNavbar = !["/", "/login", "/register"].includes(location.pathname) && !location.pathname.startsWith("/dashboard/teacher") && !location.pathname.startsWith("/dashboard/parent");
+  const showNavbar = !["/", "/login", "/register"].includes(location.pathname) && 
+    !location.pathname.startsWith("/dashboard/teacher") && 
+    !location.pathname.startsWith("/dashboard/parent") && 
+    !location.pathname.startsWith("/dashboard/school") &&
+    !location.pathname.startsWith("/admin");
 
   return (
-    <>
+    <AdminAuthProvider>
       {showNavbar && <Navbar />}
       <Routes>
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+        
         <Route element={<LoginRegisterLayout />}>
-          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
+
+        {/* School Dashboard Routes - Direct routes without Layout wrapper */}
+        <Route
+          path="/dashboard/school"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <SchoolDashboard />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/search-teachers"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <SearchTeachers />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/post-job"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <PostJob />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/job-posts"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <JobPosts />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/applications"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <Applications />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/interviews"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <Interviews />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/messages"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <SchoolMessages />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/saved-teachers"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <SchoolSavedTeachers />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/analytics"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <Analytics />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/profile"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <SchoolProfilePage />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/settings"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <Settings />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/dashboard"
@@ -115,60 +290,6 @@ function App() {
           />
 
           <Route
-            path="teacher"
-            element={
-              <RoleBasedRoute allowedRole="teacher">
-                <Dashboard />
-              </RoleBasedRoute>
-            }
-          >
-            <Route index element={<TeacherDashboardOverview />} />
-            <Route path="jobs" element={<TeacherJobsPanel />} />
-            <Route path="jobs/:jobId" element={<TeacherJobDetails />} />
-            <Route path="jobs/:jobId/apply" element={<TeacherJobApplication />} />
-            <Route path="my-classes" element={<TeacherMyClasses />} />
-            <Route path="tuitions" element={<TeacherTuitions />} />
-            <Route path="demo-classes" element={<DemoClassesPanel />} />
-            <Route path="active-students" element={<ActiveStudentsPanel />} />
-            <Route path="earnings" element={<EarningsDashboard />} />
-            <Route path="analytics" element={<TeacherAnalytics />} />
-            <Route path="messages" element={<TeacherMessages />} />
-            <Route path="notifications" element={<NotificationsPanel />} />
-            <Route path="applied-jobs" element={<AppliedJobs />} />
-            <Route path="bookmarks" element={<Bookmarks />} />
-          </Route>
-
-          <Route
-            path="school"
-            element={
-              <RoleBasedRoute allowedRole="school">
-                <Dashboard />
-              </RoleBasedRoute>
-            }
-          >
-            <Route index element={<EmployerDashboard />} />
-            <Route path="job-openings" element={<JobOpenings />} />
-          </Route>
-
-          <Route
-            path="parent"
-            element={
-              <RoleBasedRoute allowedRole="parent">
-                <ParentDashboard />
-              </RoleBasedRoute>
-            }
-          />
-
-          <Route
-            path="parent/find-tutor"
-            element={
-              <RoleBasedRoute allowedRole="parent">
-                <TutorListings />
-              </RoleBasedRoute>
-            }
-          />
-
-          <Route
             path="admin"
             element={
               <RoleBasedRoute allowedRole="admin">
@@ -176,7 +297,7 @@ function App() {
               </RoleBasedRoute>
             }
           >
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<AdminDashboardComponent />} />
           </Route>
 
           <Route path="settings" element={<Settings />}>
@@ -186,8 +307,335 @@ function App() {
           </Route>
         </Route>
 
-        <Route path="/unauthorized" element={<div>Unauthorized</div>} />
+        {/* Teacher Dashboard Routes */}
+        <Route
+          path="/dashboard/teacher"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherDashboard />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/jobs"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherJobsPanel />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/jobs/:jobId"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherJobDetails />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/jobs/:jobId/apply"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherJobApplication />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/applied-jobs"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <AppliedJobs />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/messages"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherMessages />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/analytics"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherAnalytics />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/my-classes"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherMyClasses />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/notifications"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <NotificationsPanel />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/tuitions"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherTuitions />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/demo-classes"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <DemoClassesPanel />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/active-students"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <ActiveStudentsPanel />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/earnings"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <EarningsDashboard />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/bookmarks"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <Bookmarks />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/teacher/settings"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <Settings />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Parent Dashboard Routes */}
+        <Route
+          path="/dashboard/parent"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <ParentDashboard />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/find-teachers"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <FindTeachers />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/recommended-teachers"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <RecommendedTeachers />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/saved-teachers"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <SavedTeachers />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/my-tutors"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <MyTutors />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/tuition-requests"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <TuitionRequests />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/messages"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <Messages />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/demo-classes"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <DemoClasses />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/payments"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <Payments />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/profile-settings"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <ProfileSettings />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/parent/find-tutor"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="parent">
+                <TutorListings />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/unauthorized" element={
+          <div className="min-h-screen flex items-center justify-center bg-gray-100">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-red-600 mb-4">Unauthorized Access</h1>
+              <p className="text-gray-600 mb-4">You don't have permission to access this page.</p>
+              <p className="text-sm text-gray-500">Current role: {user?.role || "Unknown"}</p>
+              <button 
+                onClick={() => navigate("/")} 
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Go to Home
+              </button>
+            </div>
+          </div>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/test" element={<TestPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/*" element={
+          <AdminProtectedRoute>
+            <AdminLayout />
+          </AdminProtectedRoute>
+        }>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="teachers" element={<AdminTeachers />} />
+          <Route path="schools" element={<AdminSchools />} />
+          <Route path="jobs" element={<AdminJobs />} />
+          <Route path="applications" element={<AdminApplications />} />
+          <Route path="messages" element={<AdminMessages />} />
+          <Route path="payments" element={<AdminPayments />} />
+          <Route path="reports" element={<AdminReports />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+        
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
       </Routes>
       <Toaster
@@ -199,7 +647,7 @@ function App() {
           loading: <RefreshCw className="animate-spin" />,
         }}
       />
-    </>
+    </AdminAuthProvider>
   );
 }
 

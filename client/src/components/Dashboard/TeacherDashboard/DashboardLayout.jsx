@@ -8,11 +8,18 @@ import {
   BarChart3,
   Newspaper,
   Menu,
+  LogOut,
 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout.mutate();
+  };
 
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard/teacher' },
@@ -44,26 +51,39 @@ const DashboardLayout = ({ children }) => {
         </div>
 
         {/* Menu Items */}
-        <nav className="mt-8 px-4 space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
+        <nav className="mt-8 px-4 space-y-2 flex-1 flex flex-col">
+          <div className="space-y-2 flex-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
 
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                  active
-                    ? 'bg-white bg-opacity-20 text-white'
-                    : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                    active
+                      ? 'bg-white bg-opacity-20 text-white'
+                      : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Logout Button */}
+          <div className="mt-auto pt-4 border-t border-white/20">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-white text-opacity-80 hover:bg-red-500 hover:bg-opacity-20 hover:text-red-200"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
         </nav>
 
         {/* Footer */}

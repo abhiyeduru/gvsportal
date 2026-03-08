@@ -80,7 +80,7 @@ const TeacherLayout = ({ children }) => {
         {/* Settings and Logout Section */}
         <div className="p-4 space-y-2 border-t border-white border-opacity-10">
           <Link
-            to="/dashboard/settings"
+            to="/dashboard/teacher/settings"
             className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-white hover:bg-opacity-10 transition-all duration-200"
           >
             <Settings className="w-5 h-5" />
@@ -157,7 +157,7 @@ const TeacherLayout = ({ children }) => {
 
             {/* User Profile */}
             <Link 
-              to="/dashboard/settings"
+              to="/dashboard/teacher/settings"
               className="flex items-center gap-3 pl-4 border-l border-gray-200 hover:bg-gray-50 rounded-xl p-2 transition-colors"
             >
               <div className="w-10 h-10 bg-gradient-to-br from-[#6C5DD3] to-[#8B7FE8] rounded-full flex items-center justify-center">
