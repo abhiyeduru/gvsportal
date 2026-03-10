@@ -3,227 +3,161 @@ import Job from "../models/Job.js";
 import { User } from "../models/User.js";
 import { createError } from "../utils/error.js";
 
-export const applyForJob = async (req, res, next) => {
-  try {
-    const { jobId } = req.params;
-    const userId = req.user.id;
+export const applicationControllers = {
+  // Apply for a job
+  applyForJob: async (req, res, next) => {
+    try {
+      const { jobId } = req.params;
+      const applicantId = req.user.id;
 
-    // Find the job
-    const job = await Job.findById(jobId);
-    if (!job) {
-      return next(createError(404, "Job not found"));
-    }
+      console.log('Applying for job:', jobId, 'by user:', applicantId);
 
-    // Check if an application already exists
-    const existingApplication = await Application.findOne({
-      job: jobId,
-      applicant: req.user.id,
-    });
+      // Check if job exists
+      const job = await Job.findById(jobId);
+      if (!job) {
+        return next(createError(404, "Job not found"));
+      }
 
-    let application;
-    let message;
-
-    if (existingApplication) {
-      // If application exists, remove it
-      const deletedApplication = await Application.findByIdAndDelete(
-        existingApplication._id
-      );
-
-      // Remove applicant from job
-      await Job.findByIdAndUpdate(jobId, {
-        $pull: { applicants: deletedApplication._id },
-      });
-
-      message = "Application removed successfully";
-    } else {
-      // If no application exists, create one
-      application = new Application({
+      // Check if already applied
+      const existingApplication = await Application.findOne({
         job: jobId,
-        applicant: userId,
+        applicant: applicantId,
       });
-      const savedApplication = await application.save();
 
-      // Add applicant to job
+      if (existingApplication) {
+        return next(createError(400, "You have already applied for this job"));
+      }
+
+      // Create new application with additional data from request body
+      const application = new Application({
+        job: jobId,
+        applicant: applicantId,
+        status: "applied",
+        coverLetter: req.body.aboutYou || req.body.coverLetter,
+        expectedSalary: req.body.expectedSalary,
+        availableFrom: req.body.availableFrom,
+      });
+
+      await application.save();
+
+      // Add application to job's applicants array
       await Job.findByIdAndUpdate(jobId, {
-        $addToSet: { applicants: savedApplication._id },
+        $push: { applicants: application._id }
       });
 
-      message = "Applied for job successfully";
+      console.log('Application created successfully:', application._id);
+
+      res.status(201).json({
+        success: true,
+        message: "Application submitted successfully",
+        application,
+      });
+    } catch (error) {
+      console.error('Error in applyForJob:', error);
+      next(error);
     }
+  },
 
-    // Fetch the updated job
-    const updatedJob = await Job.findById(jobId).populate("applicants");
+  // Get all applications for a school's jobs
+  getSchoolApplications: async (req, res, next) => {
+    try {
+      const schoolId = req.user.id;
 
-    return res.status(200).json({
-      success: true,
-      message,
-      job: updatedJob,
-      application: application || null,
-    });
-  } catch (error) {
-    console.error("Error applying/unapplying for job:", error);
-    return next(error);
-  }
-};
+      // Get all jobs posted by this school
+      const jobs = await Job.find({ postedBy: schoolId }).select("_id");
+      const jobIds = jobs.map((job) => job._id);
 
-export const getRecruiterDashboard = async (req, res, next) => {
-  try {
-    const recruiterId = req.user.id;
-
-    // Get the recruiter's companies
-    const recruiter = await User.findById(recruiterId).populate("company");
-
-    if (
-      !recruiter ||
-      !recruiter.companies ||
-      recruiter.companies.length === 0
-    ) {
-      return next(createError(404, "Recruiter or companies not found"));
-    }
-
-    const companyIds = recruiter.companies.map((company) => company._id);
-
-    // Count of active jobs across all companies
-    const activeJobsCount = await Job.countDocuments({
-      company: { $in: companyIds },
-      status: "open",
-    });
-
-    // Total applications across all companies
-    const totalApplications = await Application.countDocuments({
-      job: {
-        $in: await Job.find({ company: { $in: companyIds } }).select("_id"),
-      },
-    });
-
-    // Total interviews across all companies
-    const totalInterviews = await Application.countDocuments({
-      job: {
-        $in: await Job.find({ company: { $in: companyIds } }).select("_id"),
-      },
-      status: "interview",
-    });
-
-    // New applications (last 7 days) across all companies
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-    const newApplications = await Application.countDocuments({
-      job: {
-        $in: await Job.find({ company: { $in: companyIds } }).select("_id"),
-      },
-      appliedAt: { $gte: sevenDaysAgo },
-    });
-
-    // Recent job postings (last 5) across all companies
-    const recentJobs = await Job.find({ company: { $in: companyIds } })
-      .sort({ postedAt: -1 })
-      .limit(5)
-      .populate("company", "name logo")
-      .select(
-        "title location.city location.country postedAt company applicants"
-      );
-
-    // Recent applications (last 5) across all companies
-    const recentApplications = await Application.find({
-      job: {
-        $in: await Job.find({ company: { $in: companyIds } }).select("_id"),
-      },
-    })
-      .sort({ appliedAt: -1 })
-      .limit(5)
-      .populate("job", "title company")
-      .populate("applicant", "fullName")
-      .select("status appliedAt");
-
-    // Populate company names for recent applications
-    await Application.populate(recentApplications, {
-      path: "job.company",
-      select: "name",
-    });
-
-    return res.status(200).json({
-      activeJobsCount,
-      totalApplications,
-      totalInterviews,
-      newApplications,
-      recentJobs,
-      recentApplications,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-
-// Get all applications for a job (for employers)
-export const getJobApplications = async (req, res, next) => {
-  try {
-    const jobId = req.params.jobId;
-
-    const job = await Job.findById(jobId);
-    if (!job) return next(createError(404, "Job not found!"));
-
-    const applications = await Application.find({ job: jobId })
-      .populate({
-        path: "applicant",
-        select: "email profilePic fullName experience skills yoe address",
-        populate: {
-          path: "experience",
-          model: "Experience",
-        },
+      // Get all applications for these jobs
+      const applications = await Application.find({
+        job: { $in: jobIds },
       })
-      .populate("job", "title");
+        .populate("applicant", "fullName email contact city state skills experience qualification")
+        .populate("job", "title location salaryRange")
+        .sort({ appliedAt: -1 });
 
-    return res.status(200).json(applications);
-  } catch (error) {
-    return next(error);
-  }
-};
+      res.status(200).json({
+        success: true,
+        applications,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
-// Get all applications by a user (for job seekers)
-export const getUserApplications = async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-    console.log("getUserApplication");
+  // Get teacher's applications
+  getTeacherApplications: async (req, res, next) => {
+    try {
+      const teacherId = req.user.id;
 
-    const user = await User.findById(userId);
+      const applications = await Application.find({ applicant: teacherId })
+        .populate("job", "title companyName location salaryRange status")
+        .sort({ appliedAt: -1 });
 
-    if (!user) return next(createError(404, "User not found!"));
+      res.status(200).json({
+        success: true,
+        applications,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 
-    const applications = await Application.find({
-      applicant: userId,
-    }).populate({
-      path: "job",
-      populate: {
-        path: "company",
-        select: "name logo",
-      },
-    });
+  // Update application status (school only)
+  updateApplicationStatus: async (req, res, next) => {
+    try {
+      const { applicationId } = req.params;
+      const { status } = req.body;
+      const schoolId = req.user.id;
 
-    return res.status(200).json({
-      success: true,
-      applications,
-      message: "User Applications fetched successfully!",
-    });
-  } catch (error) {
-    console.log("UserAppErrr:", error);
-    return next(error);
-  }
-};
+      // Validate status
+      const validStatuses = ["applied", "reviewing", "interview", "hired", "rejected"];
+      if (!validStatuses.includes(status)) {
+        return next(createError(400, "Invalid status"));
+      }
 
-// Update application status (for employers)
-export const updateApplicationStatus = async (req, res, next) => {
-  try {
-    const { applicationId, status } = req.params;
+      // Find application and verify it belongs to school's job
+      const application = await Application.findById(applicationId).populate("job");
+      
+      if (!application) {
+        return next(createError(404, "Application not found"));
+      }
 
-    console.log("status:::::==>", req.params);
+      // Verify the job belongs to this school
+      if (application.job.postedBy.toString() !== schoolId) {
+        return next(createError(403, "You can only update applications for your own jobs"));
+      }
 
-    const application = await Application.findById(applicationId);
-    if (!application) return next(createError(404, "Application not found!"));
+      application.status = status;
+      await application.save();
 
-    application.status = status;
-    const updatedApplication = await application.save();
-    return res.status(200).json(updatedApplication);
-  } catch (error) {
-    return next(error);
-  }
+      res.status(200).json({
+        success: true,
+        message: "Application status updated successfully",
+        application,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // Check if teacher has applied for a job
+  checkApplicationStatus: async (req, res, next) => {
+    try {
+      const { jobId } = req.params;
+      const teacherId = req.user.id;
+
+      const application = await Application.findOne({
+        job: jobId,
+        applicant: teacherId,
+      });
+
+      res.status(200).json({
+        success: true,
+        hasApplied: !!application,
+        application: application || null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
 };

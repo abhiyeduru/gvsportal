@@ -37,15 +37,15 @@ const FindTeachers = () => {
     queryKey: ["teachers", filters, searchQuery],
     queryFn: () => getTutors({ 
       ...filters, 
-      search: searchQuery,
+      subject: searchQuery, // Use subject instead of search
       page: currentPage,
       limit: 12 
     }),
     keepPreviousData: true
   });
 
-  const teachers = teachersResponse?.data || [];
-  const totalTeachers = teachersResponse?.total || 0;
+  const tutors = teachersResponse?.tutors || [];
+  const totalTeachers = teachersResponse?.pagination?.total || 0;
 
   const handleSearch = () => {
     setCurrentPage(1); // Reset to first page when searching
@@ -149,7 +149,7 @@ const FindTeachers = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-[#111827]">
-                  {isLoading ? "Loading..." : `Showing ${teachers.length} Teachers Results`}
+                  {isLoading ? "Loading..." : `Showing ${tutors.length} Teachers Results`}
                 </h2>
                 <p className="text-sm text-[#6B7280]">Based on your preferences</p>
               </div>
@@ -222,15 +222,15 @@ const FindTeachers = () => {
             )}
 
             {/* Teachers Grid */}
-            {!isLoading && teachers.length > 0 && (
+            {!isLoading && tutors.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {teachers.map((teacher) => (
-                  <div key={teacher.id} className="bg-white rounded-2xl p-6 shadow-[0px_8px_24px_rgba(0,0,0,0.06)] hover:shadow-lg transition-all">
+                {tutors.map((tutor) => (
+                  <div key={tutor._id} className="bg-white rounded-2xl p-6 shadow-[0px_8px_24px_rgba(0,0,0,0.06)] hover:shadow-lg transition-all">
                     <div className="flex items-center space-x-3 mb-4">
-                      {teacher.profileImage ? (
+                      {tutor.profilePic ? (
                         <img 
-                          src={teacher.profileImage} 
-                          alt={teacher.name}
+                          src={tutor.profilePic} 
+                          alt={tutor.fullName}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       ) : (
@@ -239,10 +239,10 @@ const FindTeachers = () => {
                         </div>
                       )}
                       <div className="flex-1">
-                        <h3 className="font-semibold text-[#111827]">{teacher.name}</h3>
-                        <p className="text-sm text-[#6B7280]">{teacher.subject}</p>
+                        <h3 className="font-semibold text-[#111827]">{tutor.fullName}</h3>
+                        <p className="text-sm text-[#6B7280]">{tutor.primarySubject}</p>
                       </div>
-                      {teacher.verified && (
+                      {tutor.rating >= 4.5 && (
                         <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                         </div>
@@ -252,35 +252,35 @@ const FindTeachers = () => {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#6B7280]">Experience:</span>
-                        <span className="font-medium">{teacher.experience}</span>
+                        <span className="font-medium">{tutor.yoe || 0} years</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#6B7280]">Rating:</span>
                         <div className="flex items-center space-x-1">
                           <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                          <span className="font-medium">{teacher.rating}</span>
+                          <span className="font-medium">{tutor.rating || 0}</span>
                         </div>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#6B7280]">Students:</span>
-                        <span className="font-medium">{teacher.studentsCount} students</span>
+                        <span className="font-medium">{tutor.studentsTaught || 0} students</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-[#6B7280]">Location:</span>
-                        <span className="font-medium">{teacher.location}</span>
+                        <span className="font-medium">{tutor.city || 'N/A'}</span>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-[#6B7280] mb-4 line-clamp-2">{teacher.description}</p>
+                    <p className="text-sm text-[#6B7280] mb-4 line-clamp-2">{tutor.bio || 'Experienced teacher'}</p>
                     
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-lg font-bold text-[#5B3DF5]">{teacher.fee}/hour</span>
+                      <span className="text-lg font-bold text-[#5B3DF5]">₹{tutor.hourlyRate || 'N/A'}/hour</span>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        teacher.mode === 'ONLINE' ? 'bg-blue-100 text-blue-600' :
-                        teacher.mode === 'OFFLINE' ? 'bg-green-100 text-green-600' :
+                        tutor.teachingMode === 'Online' ? 'bg-blue-100 text-blue-600' :
+                        tutor.teachingMode === 'Offline' ? 'bg-green-100 text-green-600' :
                         'bg-purple-100 text-purple-600'
                       }`}>
-                        {teacher.mode}
+                        {tutor.teachingMode || 'Hybrid'}
                       </span>
                     </div>
                     
@@ -298,7 +298,7 @@ const FindTeachers = () => {
             )}
 
             {/* No Results */}
-            {!isLoading && teachers.length === 0 && (
+            {!isLoading && tutors.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-[#6B7280] mb-2">No teachers found matching your criteria</p>
                 <p className="text-sm text-[#6B7280]">Try adjusting your filters or search terms</p>
@@ -306,7 +306,7 @@ const FindTeachers = () => {
             )}
 
             {/* Pagination */}
-            {!isLoading && teachers.length > 0 && (
+            {!isLoading && tutors.length > 0 && (
               <div className="flex items-center justify-center space-x-2">
                 <button 
                   className="flex items-center space-x-1 px-4 py-2 border border-[#E5E7EB] rounded-lg hover:bg-gray-50 text-sm"

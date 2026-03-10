@@ -189,7 +189,7 @@ router.post("/create", authorize("recruiter"), jobControllers.createJob);
  *                   items:
  *                     $ref: '#/components/schemas/Job'
  */
-router.get("/get-all", authorize("jobSeeker"), jobControllers.getAllJobs);
+router.get("/get-all", jobControllers.getAllJobs);
 
 /**
  * @swagger

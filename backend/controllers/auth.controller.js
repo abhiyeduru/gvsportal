@@ -94,7 +94,10 @@ export const login = [
         return next(createError(400, "Email and password are required"));
       }
 
-      const user = await User.findOne({ email }).select("+password");
+      // Trim email to remove any whitespace
+      const trimmedEmail = email.trim();
+
+      const user = await User.findOne({ email: trimmedEmail }).select("+password");
       if (!user || !(await bcrypt.compare(password, user.password))) {
         return next(createError(401, "Invalid credentials"));
       }

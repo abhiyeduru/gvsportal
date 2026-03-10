@@ -2,6 +2,7 @@ import applicationRouter from "./routes/application.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import companyRoutes from "./routes/company.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import profileRouter from "./routes/profile.routes.js";
 import connectDB from "./db/db.js";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -10,6 +11,7 @@ import inviteCodeRouter from "./routes/invitecode.routes.js";
 import jobsRouter from "./routes/job.routes.js";
 import morgan from "morgan";
 import tuitionRouter from "./routes/tuition.routes.js";
+import messageRouter from "./routes/message.routes.js";
 import userRouter from "./routes/user.routes.js";
 import cookieParser from "cookie-parser";
 import swaggerJsdoc from "swagger-jsdoc";
@@ -69,11 +71,13 @@ app.get("/", (req, res) => {
 // Route handlers
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/profile", profileRouter);
 app.use("/api/jobs", jobsRouter);
 app.use("/api/invitecode", inviteCodeRouter);
 app.use("/api/applications", applicationRouter);
 app.use("/api/company", companyRoutes);
 app.use("/api/tuition", tuitionRouter);
+app.use("/api/messages", messageRouter);
 app.use("/api/admin", adminRoutes);
 
 // Error-handling middleware (place this at the end)

@@ -41,15 +41,13 @@ export default function AppliedJobs() {
   const getStatusBadge = (status) => {
     const statusLower = status?.toLowerCase();
     const styles = {
-      pending: "bg-gray-100 text-gray-700",
-      "on-hold": "bg-orange-100 text-orange-700",
-      candidate: "bg-green-100 text-green-700",
+      applied: "bg-yellow-100 text-yellow-700",
       reviewing: "bg-blue-100 text-blue-700",
-      interviewing: "bg-purple-100 text-purple-700",
+      interview: "bg-purple-100 text-purple-700",
       hired: "bg-green-100 text-green-700",
       rejected: "bg-red-100 text-red-700",
     };
-    return styles[statusLower] || styles.pending;
+    return styles[statusLower] || styles.applied;
   };
 
   const getJobTypeBadge = (type) => {
@@ -90,34 +88,54 @@ export default function AppliedJobs() {
               All
             </button>
             <button
-              onClick={() => setStatusFilter("pending")}
+              onClick={() => setStatusFilter("applied")}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                statusFilter === "pending"
+                statusFilter === "applied"
                   ? "bg-[#6C5DD3] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              Pending
+              Applied
             </button>
             <button
-              onClick={() => setStatusFilter("on-hold")}
+              onClick={() => setStatusFilter("reviewing")}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                statusFilter === "on-hold"
+                statusFilter === "reviewing"
                   ? "bg-[#6C5DD3] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              On-Hold
+              Reviewing
             </button>
             <button
-              onClick={() => setStatusFilter("candidate")}
+              onClick={() => setStatusFilter("interview")}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                statusFilter === "candidate"
+                statusFilter === "interview"
                   ? "bg-[#6C5DD3] text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50"
               }`}
             >
-              Candidate
+              Interview
+            </button>
+            <button
+              onClick={() => setStatusFilter("hired")}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                statusFilter === "hired"
+                  ? "bg-[#6C5DD3] text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Hired
+            </button>
+            <button
+              onClick={() => setStatusFilter("rejected")}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                statusFilter === "rejected"
+                  ? "bg-[#6C5DD3] text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              Rejected
             </button>
           </div>
 
@@ -169,7 +187,6 @@ export default function AppliedJobs() {
                 <tbody className="divide-y divide-gray-100">
                   {filteredApplications.map((application, index) => {
                     const job = application?.job;
-                    const company = job?.company;
                     
                     return (
                       <tr key={application._id} className="hover:bg-gray-50 transition-colors">
@@ -185,15 +202,11 @@ export default function AppliedJobs() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                              {company?.logo ? (
-                                <img src={company.logo} alt={company.name} className="w-full h-full rounded-xl object-cover" />
-                              ) : (
-                                <Building2 className="w-5 h-5 text-gray-400" />
-                              )}
+                              <Building2 className="w-5 h-5 text-[#6C5CE7]" />
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-gray-800">{company?.name || 'Company Name'}</p>
-                              <p className="text-xs text-gray-500">Creative Design Agency</p>
+                              <p className="text-sm font-semibold text-gray-800">{job?.companyName || 'School'}</p>
+                              <p className="text-xs text-gray-500">{job?.location?.city || 'Location'}</p>
                             </div>
                           </div>
                         </td>
@@ -217,11 +230,14 @@ export default function AppliedJobs() {
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getStatusBadge(application?.status)}`}>
-                            {application?.status || 'Pending'}
+                            {application?.status || 'applied'}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                          <button 
+                            onClick={() => window.location.href = `/dashboard/teacher/jobs/${job?._id}`}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
                             <MoreVertical className="w-5 h-5 text-gray-600" />
                           </button>
                         </td>

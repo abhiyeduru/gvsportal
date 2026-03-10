@@ -48,6 +48,7 @@ import LandingPage from "./pages/LandingPage";
 // Profile Components
 import ProfilePage from "./pages/ProfilePage";
 import SchoolProfilePage from "./pages/SchoolProfilePage";
+import TeacherProfileView from "./pages/TeacherProfileView";
 
 // School Dashboard Components
 import SchoolDashboard from "@/pages/SchoolDashboard";
@@ -59,6 +60,8 @@ import Applications from "@/components/Dashboard/SchoolDashboard/Applications";
 import Interviews from "@/components/Dashboard/SchoolDashboard/Interviews";
 import SchoolSavedTeachers from "@/components/Dashboard/SchoolDashboard/SavedTeachers";
 import Analytics from "@/components/Dashboard/SchoolDashboard/Analytics";
+import SchoolJobDetails from "@/components/Dashboard/SchoolDashboard/SchoolJobDetails";
+import EditJob from "@/components/Dashboard/SchoolDashboard/EditJob";
 import Login from "./pages/Login";
 import Settings from "./components/Dashboard/Settings";
 import Profile from "./components/Dashboard/Settings/Profile";
@@ -93,10 +96,10 @@ import ActiveStudentsPanel from "@/components/Dashboard/ActiveStudentsPanel";
 import EarningsDashboard from "@/components/Dashboard/EarningsDashboard";
 import DemoClassesPanel from "@/components/Dashboard/DemoClassesPanel";
 import NotificationsPanel from "@/components/Dashboard/NotificationsPanel";
+import TeacherProfile from "@/components/Dashboard/Profile/TeacherProfile";
 
-import ProtectedRoute from "./ProtectedRoutes/ProtectedRoute";
-import RoleBasedRoute from "./ProtectedRoutes/RoleBasedRoute";
-import { useAuth } from "./hooks/useAuth";
+import CompleteProfilePage from "./pages/CompleteProfilePage";
+import ProfileCompletionRoute from "./ProtectedRoutes/ProfileCompletionRoute";
 
 function App() {
   const navigate = useNavigate();
@@ -106,7 +109,7 @@ function App() {
   useEffect(() => {
     if (isLoading) return;
 
-    const guestPaths = ["/login", "/register"];
+    const guestPaths = ["/login", "/register", "/"];
     const isGuestPath = guestPaths.includes(location.pathname);
 
     if (isAuthenticated && user?.role && isGuestPath) {
@@ -146,13 +149,25 @@ function App() {
           <Route path="/register" element={<Register />} />
         </Route>
 
+        {/* Complete Profile Route */}
+        <Route
+          path="/complete-profile"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <CompleteProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* School Dashboard Routes - Direct routes without Layout wrapper */}
         <Route
           path="/dashboard/school"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RoleBasedRoute allowedRole="school">
-                <SchoolDashboard />
+                <ProfileCompletionRoute>
+                  <SchoolDashboard />
+                </ProfileCompletionRoute>
               </RoleBasedRoute>
             </ProtectedRoute>
           }
@@ -164,6 +179,17 @@ function App() {
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RoleBasedRoute allowedRole="school">
                 <SearchTeachers />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/teacher/:teacherId"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <TeacherProfileView />
               </RoleBasedRoute>
             </ProtectedRoute>
           }
@@ -186,6 +212,28 @@ function App() {
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RoleBasedRoute allowedRole="school">
                 <JobPosts />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/jobs/:jobId"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <SchoolJobDetails />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/school/edit-job/:jobId"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="school">
+                <EditJob />
               </RoleBasedRoute>
             </ProtectedRoute>
           }
@@ -313,7 +361,9 @@ function App() {
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RoleBasedRoute allowedRole="teacher">
-                <TeacherDashboard />
+                <ProfileCompletionRoute>
+                  <TeacherDashboard />
+                </ProfileCompletionRoute>
               </RoleBasedRoute>
             </ProtectedRoute>
           }
@@ -463,11 +513,22 @@ function App() {
         />
 
         <Route
+          path="/dashboard/teacher/profile"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <RoleBasedRoute allowedRole="teacher">
+                <TeacherProfile />
+              </RoleBasedRoute>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/dashboard/teacher/settings"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RoleBasedRoute allowedRole="teacher">
-                <Settings />
+                <TeacherProfile />
               </RoleBasedRoute>
             </ProtectedRoute>
           }
@@ -479,7 +540,9 @@ function App() {
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RoleBasedRoute allowedRole="parent">
-                <ParentDashboard />
+                <ProfileCompletionRoute>
+                  <ParentDashboard />
+                </ProfileCompletionRoute>
               </RoleBasedRoute>
             </ProtectedRoute>
           }

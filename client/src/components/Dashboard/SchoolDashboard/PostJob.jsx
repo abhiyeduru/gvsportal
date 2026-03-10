@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SchoolLayout from './SchoolLayout';
+import { toast } from 'sonner';
+import axiosInstance from '@/lib/axiosInstance';
 import { 
   FileText, 
   MapPin, 
@@ -10,10 +13,13 @@ import {
   BookOpen,
   Award,
   Plus,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 
 const PostJob = () => {
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     jobTitle: '',
     subject: '',
@@ -83,10 +89,58 @@ const PostJob = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Job posting data:', formData);
-    // Handle form submission
+    
+    // Validation
+    if (!formData.jobTitle || !formData.subject || !formData.location || !formData.salary) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.classLevels.length === 0) {
+      toast.error('Please select at least one class level');
+      return;
+    }
+
+    setIsSubmitting(true);
+    console.log('Submitting job posting:', formData);
+
+    try {
+      const response = await axiosInstance.post('/jobs/create', formData);
+      
+      console.log('Job posted successfully:', response.data);
+      
+      if (response.data.success) {
+        toast.success('Job posted successfully!');
+        // Reset form
+        setFormData({
+          jobTitle: '',
+          subject: '',
+          jobType: 'full-time',
+          experience: '',
+          location: '',
+          salary: '',
+          description: '',
+          requirements: [''],
+          responsibilities: [''],
+          benefits: [''],
+          applicationDeadline: '',
+          startDate: '',
+          workingHours: '',
+          classLevels: []
+        });
+        // Navigate to job posts page
+        setTimeout(() => {
+          navigate('/dashboard/school/job-posts');
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Error posting job:', error);
+      toast.error(error.response?.data?.message || 'Failed to post job. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -353,15 +407,19 @@ const PostJob = () => {
           <div className="flex items-center justify-end space-x-4">
             <button
               type="button"
-              className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+              onClick={() => navigate('/dashboard/school')}
+              disabled={isSubmitting}
+              className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save as Draft
+              Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-3 bg-[#6C5CE7] text-white rounded-xl hover:bg-[#5A4FCF] transition-colors font-medium"
+              disabled={isSubmitting}
+              className="px-6 py-3 bg-[#6C5CE7] text-white rounded-xl hover:bg-[#5A4FCF] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
-              Post Job
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              <span>{isSubmitting ? 'Posting...' : 'Post Job'}</span>
             </button>
           </div>
         </form>

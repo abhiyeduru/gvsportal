@@ -9,10 +9,12 @@ import {
   Instagram,
   Youtube,
   ExternalLink,
-  MoreHorizontal
+  MoreHorizontal,
+  Camera,
+  Loader2
 } from 'lucide-react';
 
-const SchoolProfileSummary = ({ user, profileData }) => {
+const SchoolProfileSummary = ({ user, profileData, onImageUpload, isUploadingImage }) => {
   const stats = [
     { label: 'Active Jobs', value: '6' },
     { label: 'Applications', value: '132' },
@@ -71,6 +73,25 @@ const SchoolProfileSummary = ({ user, profileData }) => {
               </AvatarFallback>
             </Avatar>
           </div>
+          {/* Image Upload Button */}
+          <label 
+            htmlFor="school-profile-upload" 
+            className="absolute bottom-0 right-0 w-10 h-10 bg-[#6C5CE7] rounded-full flex items-center justify-center text-white hover:bg-[#5A4FCF] transition-colors cursor-pointer shadow-lg"
+          >
+            {isUploadingImage ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5" />
+            )}
+          </label>
+          <input
+            id="school-profile-upload"
+            type="file"
+            accept="image/jpeg,image/png,image/jpg"
+            onChange={onImageUpload}
+            className="hidden"
+            disabled={isUploadingImage}
+          />
           {/* Progress Ring */}
           <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 100 100">
             <circle

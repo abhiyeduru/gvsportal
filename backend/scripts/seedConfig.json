@@ -1,0 +1,25 @@
+{
+  "clearExisting": false,
+  "features": {
+    "admin": true,
+    "users": true,
+    "jobs": true,
+    "applications": true,
+    "tuitions": true,
+    "messages": true,
+    "inviteCodes": true
+  },
+  "counts": {
+    "teachers": 3,
+    "parents": 2,
+    "schools": 2,
+    "jobs": 3,
+    "applications": 2,
+    "tuitions": 2,
+    "messages": 2
+  },
+  "testCredentials": {
+    "adminPassword": "admin123",
+    "userPassword": "test123"
+  }
+}

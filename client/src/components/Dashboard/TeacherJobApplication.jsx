@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import TeacherLayout from './TeacherDashboard/TeacherLayout';
 import axiosInstance from '@/lib/axiosInstance';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 import {
   ArrowLeft,
   Building2,
@@ -124,58 +125,23 @@ const TeacherJobApplication = () => {
 
     // Validation
     if (!formData.firstName || !formData.lastName || !formData.email) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    if (!resume) {
-      alert('Please upload your resume');
+      toast.error('Please fill in all required fields');
       return;
     }
 
     try {
       setSubmitting(true);
 
-      // Upload resume first if needed
-      let resumeUrl = '';
-      if (resume) {
-        const formDataUpload = new FormData();
-        formDataUpload.append('file', resume);
-        
-        const uploadResponse = await axiosInstance.post('/upload/single', formDataUpload, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        
-        resumeUrl = uploadResponse.data.url;
-      }
-
       // Submit application
-      const applicationData = {
-        coverLetter: formData.aboutYou,
-        expectedSalary: formData.expectedSalary ? parseInt(formData.expectedSalary) : undefined,
-        availableFrom: formData.availableFrom || undefined,
-        resumeUrl,
-        applicantDetails: {
-          firstName: formData.firstName,
-          middleName: formData.middleName,
-          lastName: formData.lastName,
-          birthDate: formData.birthDate,
-          phoneNumber: formData.phoneNumber,
-          email: formData.email,
-        },
-      };
-
-      const response = await axiosInstance.post(`/jobs/${jobId}/apply`, applicationData);
+      const response = await axiosInstance.post(`/applications/jobs/${jobId}/apply`);
 
       if (response.data.success) {
-        alert('Application submitted successfully!');
+        toast.success('Application submitted successfully!');
         navigate(`/dashboard/teacher/jobs/${jobId}`);
       }
     } catch (error) {
       console.error('Error submitting application:', error);
-      alert(error.response?.data?.message || 'Failed to submit application');
+      toast.error(error.response?.data?.message || 'Failed to submit application');
     } finally {
       setSubmitting(false);
     }
@@ -217,7 +183,7 @@ const TeacherJobApplication = () => {
 
   return (
     <TeacherLayout>
-      <div className="p-6 bg-[#F5F6FA] min-h-screen">
+      <div className="p-6 bg-[#F5F6FA] min-h-screen overflow-y-auto">
         {/* Breadcrumb */}
         <div className="mb-6">
           <button
@@ -506,26 +472,26 @@ const TeacherJobApplication = () => {
                 )}
               </div>
 
-              {/* Form Buttons */}
-              <div className="flex gap-4">
+              {/* Form Buttons - Fixed at bottom with clear visibility */}
+              <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
+                  className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all shadow-lg ${
                     submitting
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-[#5B2EFF] text-white hover:bg-[#4A25CC]'
+                      : 'bg-[#5B2EFF] text-white hover:bg-[#4A25CC] hover:shadow-xl'
                   }`}
                 >
-                  {submitting ? 'Submitting...' : 'Submit Application'}
+                  {submitting ? 'Submitting...' : '✓ Submit Application'}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
                   disabled={submitting}
-                  className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all disabled:opacity-50"
+                  className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-xl font-bold text-lg hover:bg-gray-200 transition-all shadow-lg disabled:opacity-50"
                 >
-                  Cancel
+                  ✕ Cancel
                 </button>
               </div>
             </form>

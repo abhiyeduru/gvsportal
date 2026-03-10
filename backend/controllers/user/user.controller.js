@@ -31,8 +31,19 @@ export const getUserProfile = async (req, res, next) => {
 // Fetch Current Protected
 export const fetchCurrentUser = async (req, res, next) => {
   try {
+    // Check if req.user exists
+    if (!req.user) {
+      console.error("req.user is null or undefined");
+      return next(createError(401, "User not authenticated"));
+    }
+
     // The user ID is attached to the request by the authentication middleware
-    const userId = req.user.id;
+    const userId = req.user.id || req.user._id;
+
+    if (!userId) {
+      console.error("User ID not found in req.user:", req.user);
+      return next(createError(401, "Invalid user data"));
+    }
 
     // Fetch the user from the database, excluding the password
     const user = await User.findById(userId)
@@ -97,10 +108,9 @@ export const updateUserAuth = async (req, res, next) => {
 // Update User Profile
 export const updateProfile = async (req, res, next) => {
   const userId = req.user.id;
-  console.log("upating profile", req.user.id);
+  console.log("updating profile", req.user.id);
   try {
     const user = await User.findById(userId)
-      .select("-password")
       .populate("projects")
       .populate("experience")
       .populate("education")
@@ -120,19 +130,43 @@ export const updateProfile = async (req, res, next) => {
       skills: req.body.skills || user.skills,
       profileLinks: req.body.profileLinks || user.profileLinks,
       company: req.body.company || user.company,
+      yoe: req.body.yoe || user.yoe,
+      // Teacher-specific fields
+      primarySubject: req.body.primarySubject || user.primarySubject,
+      secondarySubjects: req.body.secondarySubjects || user.secondarySubjects,
+      city: req.body.city || user.city,
+      state: req.body.state || user.state,
+      qualification: req.body.qualification || user.qualification,
+      hourlyRate: req.body.hourlyRate || user.hourlyRate,
+      availableForHire: req.body.availableForHire !== undefined ? req.body.availableForHire : user.availableForHire,
+      specializations: req.body.specializations || user.specializations,
+      languages: req.body.languages || user.languages,
+      teachingMode: req.body.teachingMode || user.teachingMode,
+      achievements: req.body.achievements || user.achievements,
     };
+
+    // Update password if provided
+    if (req.body.password) {
+      const bcrypt = await import('bcryptjs');
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(req.body.password, salt);
+    }
 
     // Update user profile fields
     Object.assign(user, updatedProfileData);
     const updatedUser = await user.save();
 
+    // Remove password from response
+    const userResponse = updatedUser.toObject();
+    delete userResponse.password;
+
     res.status(200).json({
       success: true,
       message: "User profile updated successfully!",
-      updatedUser,
+      updatedUser: userResponse,
     });
   } catch (error) {
-    console.log("Error updating profile", req.user.id);
+    console.log("Error updating profile", error);
     next(error);
   }
 };

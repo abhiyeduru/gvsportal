@@ -6,7 +6,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "seed": "node scripts/seedDatabase.js",
+    "seed:all": "node scripts/seedManager.js all",
+    "seed:users": "node scripts/seedManager.js seed users",
+    "seed:jobs": "node scripts/seedManager.js seed jobs",
+    "seed:admin": "node scripts/seedManager.js seed admin",
+    "seed:stats": "node scripts/seedManager.js stats",
+    "seed:clear": "node scripts/seedManager.js clear all",
+    "seed:test": "node scripts/seedTestUsers.js",
+    "create:admin": "node scripts/createAdmin.js",
+    "check:admin": "node scripts/checkAdmin.js",
+    "check:jobs": "node scripts/checkJobs.js",
+    "check:user": "node scripts/checkUser.js"
   },
   "type": "module",
   "keywords": [],

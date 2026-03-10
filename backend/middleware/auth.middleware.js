@@ -20,11 +20,17 @@ export const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
       // Get user from the token
-      req.user = await User.findById(decoded.id).select("-password");
-
+      const user = await User.findById(decoded.id).select("-password");
+      
+      if (!user) {
+        console.error("User not found for token ID:", decoded.id);
+        return next(createError(401, "User no longer exists"));
+      }
+      
+      req.user = user;
       next();
     } catch (error) {
-      console.error(error);
+      console.error("Token verification error:", error.message);
       return next(createError(401, "Not authorized, token failed"));
     }
   } else {

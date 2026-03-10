@@ -1,4 +1,3 @@
-import { Company } from "../../models/Company.js";
 import Job from "../../models/Job.js";
 import { User } from "../../models/User.js";
 import { createError } from "../../utils/error.js";
@@ -7,37 +6,58 @@ export const jobControllers = {
   // Create a new job
   createJob: async (req, res, next) => {
     const recruiterId = req.user.id;
+    console.log("Creating job for recruiter:", recruiterId);
     try {
       const recruiter = await User.findById(recruiterId);
       if (!recruiter || recruiter.role !== "recruiter") {
-        return next(createError(403, "Only recruiters can post jobs"));
+        return next(createError(403, "Only schools can post jobs"));
       }
 
-      const companyId = req.body.company; // Get company ID from request body
-      const company = await Company.findById(companyId);
-      if (!company) {
-        return next(createError(404, "Company not found"));
-      }
-
+      // For school-based system, use the school (recruiter) as the company
+      // Create job with school information
       const newJob = new Job({
-        ...req.body,
-        company: companyId, // Use the company ID from the request body
+        title: req.body.jobTitle || req.body.title,
+        description: req.body.description,
+        requirements: req.body.requirements || [],
+        responsibilities: req.body.responsibilities || [],
+        benefits: req.body.benefits || [],
+        skillsRequired: req.body.subject || req.body.skillsRequired,
+        experience: req.body.experience,
+        jobType: req.body.jobType || 'full-time',
+        workFrom: req.body.workFrom || 'on-site',
+        location: {
+          city: req.body.location || recruiter.city || 'Not specified',
+          state: recruiter.state || '',
+          country: 'India'
+        },
+        salaryRange: {
+          min: req.body.salaryMin || req.body.salary?.split('-')[0]?.trim() || '0',
+          max: req.body.salaryMax || req.body.salary?.split('-')[1]?.trim() || '0',
+          currency: 'INR'
+        },
+        applicationDeadline: req.body.applicationDeadline ? new Date(req.body.applicationDeadline) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        startDate: req.body.startDate ? new Date(req.body.startDate) : null,
+        workingHours: req.body.workingHours || 'Not specified',
+        classLevels: req.body.classLevels || [],
+        subject: req.body.subject,
         postedBy: recruiter._id,
+        company: recruiter._id, // Use school user as company
+        companyName: recruiter.fullName || 'School',
+        status: 'open',
+        postedAt: new Date()
       });
 
       const savedJob = await newJob.save();
 
-      // Add job to company's jobs array
-      company.jobs.push(savedJob._id);
-      await company.save();
+      console.log("Job created successfully:", savedJob._id);
 
       res.status(201).json({
         success: true,
         message: "Job posted successfully!",
-        savedJob,
+        job: savedJob,
       });
     } catch (err) {
-      console.log("ERROR.message", err.message);
+      console.log("ERROR creating job:", err.message);
       next(err);
     }
   },
@@ -103,7 +123,8 @@ export const jobControllers = {
       console.log("Constructed filter:", JSON.stringify(filter, null, 2));
 
       const sort = {};
-      sort[sortBy] = sortOrder === "asc" ? 1 : -1;
+      const sortField = sortBy === 'newest' || sortBy === 'oldest' ? 'postedAt' : sortBy;
+      sort[sortField] = sortOrder === "asc" ? 1 : -1;
 
       const query = Job.find(filter)
         .sort(sort)
@@ -127,8 +148,12 @@ export const jobControllers = {
 
       console.log("Query executed. Number of jobs found:", _jobs.length);
 
+      // Return empty array if no jobs found instead of error
       if (_jobs.length === 0) {
-        return next(createError(404, "No jobs found matching the criteria!"));
+        return res.status(200).json({
+          nextCursor: null,
+          jobs: [],
+        });
       }
 
       const hasNextPage = _jobs.length > parseInt(limit);
@@ -159,7 +184,10 @@ export const jobControllers = {
   // Get a specific job by ID
   getJobById: async (req, res, next) => {
     try {
-      const job = await Job.findById(req.params.id)
+      const jobId = req.params.jobId || req.params.id;
+      console.log("Getting job by ID:", jobId);
+      
+      const job = await Job.findById(jobId)
         .populate("company")
         .populate("postedBy", "fullName email");
 
@@ -169,6 +197,7 @@ export const jobControllers = {
 
       res.status(200).json(job);
     } catch (err) {
+      console.error("Error in getJobById:", err);
       next(err);
     }
   },
@@ -187,9 +216,37 @@ export const jobControllers = {
         return next(createError(403, "You can update only your own job posts"));
       }
 
+      // Map form data to job schema
+      const updateData = {
+        title: req.body.jobTitle || req.body.title,
+        description: req.body.description,
+        requirements: req.body.requirements || [],
+        responsibilities: req.body.responsibilities || [],
+        benefits: req.body.benefits || [],
+        skillsRequired: req.body.subject || req.body.skillsRequired,
+        experience: req.body.experience,
+        jobType: req.body.jobType || 'full-time',
+        workFrom: req.body.workFrom || 'on-site',
+        location: {
+          city: req.body.location || job.location?.city || 'Not specified',
+          state: job.location?.state || '',
+          country: 'India'
+        },
+        salaryRange: {
+          min: req.body.salaryMin || req.body.salary?.split('-')[0]?.trim() || job.salaryRange?.min || '0',
+          max: req.body.salaryMax || req.body.salary?.split('-')[1]?.trim() || job.salaryRange?.max || '0',
+          currency: 'INR'
+        },
+        applicationDeadline: req.body.applicationDeadline ? new Date(req.body.applicationDeadline) : job.applicationDeadline,
+        startDate: req.body.startDate ? new Date(req.body.startDate) : job.startDate,
+        workingHours: req.body.workingHours || job.workingHours,
+        classLevels: req.body.classLevels || job.classLevels || [],
+        subject: req.body.subject || job.subject
+      };
+
       const updatedJob = await Job.findByIdAndUpdate(
         jobId,
-        { $set: req.body },
+        { $set: updateData },
         { new: true }
       );
 
@@ -206,7 +263,10 @@ export const jobControllers = {
   // Delete a job
   deleteJob: async (req, res, next) => {
     try {
-      const job = await Job.findById(req.params.id);
+      const jobId = req.params.jobId || req.params.id;
+      console.log("Deleting job:", jobId);
+      
+      const job = await Job.findById(jobId);
       if (!job) {
         return next(createError(404, "Job not found"));
       }
@@ -216,15 +276,14 @@ export const jobControllers = {
         return next(createError(403, "You can delete only your own job posts"));
       }
 
-      // Remove job from company's jobs array
-      await Company.findByIdAndUpdate(job.company, {
-        $pull: { jobs: job._id },
+      await Job.findByIdAndDelete(jobId);
+
+      res.status(200).json({ 
+        success: true,
+        message: "Job has been deleted successfully" 
       });
-
-      await Job.findByIdAndDelete(req.params.id);
-
-      res.status(200).json({ message: "Job has been deleted successfully" });
     } catch (err) {
+      console.error("Error deleting job:", err);
       next(err);
     }
   },
@@ -259,9 +318,12 @@ export const jobControllers = {
         .populate("company", "name logo")
         .populate("applicants", "fullName email");
 
-      // if no job is found return status 404 and message
+      // Return empty array if no jobs found instead of error
       if (_jobs.length === 0) {
-        return next(createError(404, "No jobs found matching the criteria"));
+        return res.status(200).json({
+          nextCursor: null,
+          jobs: [],
+        });
       }
 
       const hasNextPage = _jobs.length > parseInt(limit);

@@ -1,12 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import TeacherLayout from "../../TeacherDashboard/TeacherLayout";
 import {
-  User, Phone, Mail, MapPin, Globe, Facebook, Linkedin, Youtube, Plus, Eye, EyeOff
+  User, Phone, Mail, MapPin, Globe, Linkedin, Youtube, Plus, ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,51 +12,191 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from 'sonner';
+import axiosInstance from '@/lib/axiosInstance';
+import { useNavigate } from 'react-router-dom';
+
+// Indian States
+const INDIAN_STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+];
+
+// Major Indian Cities
+const INDIAN_CITIES = [
+  'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata',
+  'Surat', 'Pune', 'Jaipur', 'Lucknow', 'Kanpur', 'Nagpur', 'Indore', 'Thane',
+  'Bhopal', 'Visakhapatnam', 'Pimpri-Chinchwad', 'Patna', 'Vadodara', 'Ghaziabad',
+  'Ludhiana', 'Agra', 'Nashik', 'Faridabad', 'Meerut', 'Rajkot', 'Kalyan-Dombivali',
+  'Vasai-Virar', 'Varanasi', 'Srinagar', 'Aurangabad', 'Dhanbad', 'Amritsar',
+  'Navi Mumbai', 'Allahabad', 'Ranchi', 'Howrah', 'Coimbatore', 'Jabalpur',
+  'Gwalior', 'Vijayawada', 'Jodhpur', 'Madurai', 'Raipur', 'Kota', 'Chandigarh',
+  'Guwahati', 'Solapur', 'Hubli-Dharwad', 'Mysore', 'Tiruchirappalli', 'Bareilly',
+  'Aligarh', 'Tiruppur', 'Moradabad', 'Jalandhar', 'Bhubaneswar', 'Salem',
+  'Warangal', 'Guntur', 'Bhiwandi', 'Saharanpur', 'Gorakhpur', 'Bikaner',
+  'Amravati', 'Noida', 'Jamshedpur', 'Bhilai', 'Cuttack', 'Firozabad',
+  'Kochi', 'Nellore', 'Bhavnagar', 'Dehradun', 'Durgapur', 'Asansol',
+  'Rourkela', 'Nanded', 'Kolhapur', 'Ajmer', 'Akola', 'Gulbarga', 'Jamnagar',
+  'Ujjain', 'Loni', 'Siliguri', 'Jhansi', 'Ulhasnagar', 'Jammu', 'Sangli-Miraj',
+  'Mangalore', 'Erode', 'Belgaum', 'Ambattur', 'Tirunelveli', 'Malegaon',
+  'Gaya', 'Jalgaon', 'Udaipur', 'Maheshtala'
+].sort();
 
 const TeacherProfileEdit = () => {
-  const { user } = useAuth();
+  const { user, refetchUser } = useAuth();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [availableForHire, setAvailableForHire] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
-    firstName: user?.fullName?.split(' ')[0] || '',
+    firstName: '',
     middleName: '',
-    lastName: user?.fullName?.split(' ')[1] || '',
-    username: user?.email?.split('@')[0] || '',
+    lastName: '',
+    username: '',
     password: '',
     confirmPassword: '',
-    mobile: user?.phone || '',
+    mobile: '',
     whatsapp: '',
-    email: user?.email || '',
-    address: user?.address || '',
+    email: '',
+    address: '',
     city: '',
+    state: '',
     country: 'India',
-    about: user?.bio || '',
+    primarySubject: '',
+    secondarySubjects: '',
+    experience: '',
+    qualification: '',
+    teachingMode: 'Hybrid',
+    about: '',
   });
 
   // Skills state
   const [skills, setSkills] = useState([
-    { name: 'Programming', level: 78 },
-    { name: 'UI Design', level: 89 },
-    { name: 'Prototyping', level: 65 },
-    { name: 'Researching', level: 94 },
+    { name: 'Subject Knowledge', level: 90 },
+    { name: 'Communication', level: 85 },
+    { name: 'Online Teaching', level: 80 },
+    { name: 'Classroom Management', level: 88 },
   ]);
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Load user data on mount
+  useEffect(() => {
+    if (user) {
+      const nameParts = user.fullName?.split(' ') || ['', '', ''];
+      setFormData({
+        firstName: nameParts[0] || '',
+        middleName: nameParts[1] || '',
+        lastName: nameParts[2] || '',
+        username: user.email?.split('@')[0] || '',
+        password: '',
+        confirmPassword: '',
+        mobile: user.contact || '',
+        whatsapp: user.contact || '',
+        email: user.email || '',
+        address: user.address || '',
+        city: user.city || '',
+        state: user.state || '',
+        country: 'India',
+        primarySubject: user.primarySubject || '',
+        secondarySubjects: user.secondarySubjects || '',
+        experience: user.yoe || '',
+        qualification: user.qualification || '',
+        teachingMode: user.teachingMode || 'Hybrid',
+        about: user.bio || '',
+      });
+      
+      if (user.skills && user.skills.length > 0) {
+        setSkills(user.skills.map(skill => ({
+          name: typeof skill === 'string' ? skill : skill.name,
+          level: skill.level || 50
+        })));
+      }
+      
+      setAvailableForHire(user.availableForHire !== false);
+    }
+  }, [user]);
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSkillChange = (index, value) => {
+  const handleSkillChange = (index, field, value) => {
     const newSkills = [...skills];
-    newSkills[index].level = value;
+    newSkills[index][field] = value;
     setSkills(newSkills);
   };
 
-  const handleSave = () => {
-    console.log('Saving profile...', formData);
-    // Add save logic here
+  const addNewSkill = () => {
+    setSkills([...skills, { name: 'New Skill', level: 50 }]);
+  };
+
+  const removeSkill = (index) => {
+    setSkills(skills.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+
+      // Validate passwords match if provided
+      if (formData.password && formData.password !== formData.confirmPassword) {
+        toast.error('Passwords do not match');
+        return;
+      }
+
+      // Prepare update data
+      const updateData = {
+        fullName: `${formData.firstName} ${formData.middleName} ${formData.lastName}`.trim(),
+        contact: formData.mobile,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        primarySubject: formData.primarySubject,
+        secondarySubjects: formData.secondarySubjects,
+        yoe: formData.experience,
+        qualification: formData.qualification,
+        teachingMode: formData.teachingMode,
+        bio: formData.about,
+        skills: skills,
+        availableForHire: availableForHire,
+      };
+
+      // Only include password if it's being changed
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
+
+      // Call API to update profile
+      const response = await axiosInstance.put('/api/user/profile-update', updateData);
+
+      if (response.data.success) {
+        toast.success('Profile updated successfully!');
+        await refetchUser();
+        // Clear password fields
+        setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/dashboard/teacher');
+  };
+
+  const handleBack = () => {
+    navigate('/dashboard/teacher');
   };
 
   // Calculate profile completion
@@ -71,8 +209,17 @@ const TeacherProfileEdit = () => {
     <TeacherLayout>
       <div className="p-8 space-y-6 bg-[#F7F8FC] min-h-screen">
         {/* Breadcrumb */}
-        <div className="text-sm text-gray-500">
-          Profile / <span className="text-gray-800 font-medium">Edit Profile</span>
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            Profile / <span className="text-gray-800 font-medium">Edit Profile</span>
+          </div>
+          <button
+            onClick={handleBack}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-medium">Back to Dashboard</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -106,73 +253,78 @@ const TeacherProfileEdit = () => {
                 <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">General</h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div>
-                    <Input
-                      name="firstName"
+                    <label className="text-sm text-gray-600 mb-1 block">First Name</label>
+                    <input
+                      type="text"
                       value={formData.firstName}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('firstName', e.target.value)}
                       placeholder="First Name"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3]"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                   </div>
                   <div>
-                    <Input
-                      name="middleName"
+                    <label className="text-sm text-gray-600 mb-1 block">Middle Name</label>
+                    <input
+                      type="text"
                       value={formData.middleName}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('middleName', e.target.value)}
                       placeholder="Middle Name"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3]"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                   </div>
                   <div>
-                    <Input
-                      name="lastName"
+                    <label className="text-sm text-gray-600 mb-1 block">Last Name</label>
+                    <input
+                      type="text"
                       value={formData.lastName}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('lastName', e.target.value)}
                       placeholder="Last Name"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3]"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Input
-                      name="username"
+                    <label className="text-sm text-gray-600 mb-1 block">Username</label>
+                    <input
+                      type="text"
                       value={formData.username}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('username', e.target.value)}
                       placeholder="Username"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3]"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
+                      disabled
                     />
                   </div>
                   <div className="relative">
-                    <Input
-                      name="password"
+                    <label className="text-sm text-gray-600 mb-1 block">Password</label>
+                    <input
                       type={showPassword ? 'text' : 'password'}
                       value={formData.password}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
                       placeholder="Password"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3] pr-16"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 pr-16 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 text-[#6C5DD3] text-xs font-semibold"
+                      className="absolute right-0 top-8 text-[#6C5DD3] text-xs font-semibold"
                     >
                       {showPassword ? 'HIDE' : 'SHOW'}
                     </button>
                   </div>
                   <div className="relative">
-                    <Input
-                      name="confirmPassword"
+                    <label className="text-sm text-gray-600 mb-1 block">Re-Type Password</label>
+                    <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={formData.confirmPassword}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                       placeholder="Re-Type Password"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3] pr-16"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 pr-16 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 text-[#6C5DD3] text-xs font-semibold"
+                      className="absolute right-0 top-8 text-[#6C5DD3] text-xs font-semibold"
                     >
                       {showConfirmPassword ? 'HIDE' : 'SHOW'}
                     </button>
@@ -185,68 +337,141 @@ const TeacherProfileEdit = () => {
                 <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">Contact</h3>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="relative">
-                    <Phone className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      name="mobile"
+                    <label className="text-sm text-gray-600 mb-1 block">Mobile Phone</label>
+                    <Phone className="absolute left-0 bottom-2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
                       value={formData.mobile}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('mobile', e.target.value)}
                       placeholder="Mobile Phone"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3] pl-6"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 pl-6 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                   </div>
                   <div className="relative">
-                    <Phone className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      name="whatsapp"
+                    <label className="text-sm text-gray-600 mb-1 block">Whatsapp</label>
+                    <Phone className="absolute left-0 bottom-2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
                       value={formData.whatsapp}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('whatsapp', e.target.value)}
                       placeholder="Whatsapp"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3] pl-6"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 pl-6 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                   </div>
                   <div className="relative">
-                    <Mail className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      name="email"
+                    <label className="text-sm text-gray-600 mb-1 block">Email</label>
+                    <Mail className="absolute left-0 bottom-2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="email"
                       value={formData.email}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="Email"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3] pl-6"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 pl-6 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
+                      disabled
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="relative">
-                    <MapPin className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      name="address"
+                    <label className="text-sm text-gray-600 mb-1 block">Address</label>
+                    <MapPin className="absolute left-0 bottom-2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
                       value={formData.address}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
                       placeholder="Address"
-                      className="border-0 border-b border-gray-300 rounded-none focus:border-[#6C5DD3] pl-6"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 pl-6 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
                     />
                   </div>
                   <div>
-                    <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                    <label className="text-sm text-gray-600 mb-1 block">City</label>
+                    <Select value={formData.city} onValueChange={(value) => handleInputChange('city', value)}>
                       <SelectTrigger className="border-0 border-b border-gray-300 rounded-none">
-                        <SelectValue placeholder="City" />
+                        <SelectValue placeholder="Select City" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="delhi">Delhi</SelectItem>
-                        <SelectItem value="mumbai">Mumbai</SelectItem>
-                        <SelectItem value="bangalore">Bangalore</SelectItem>
+                      <SelectContent className="max-h-60">
+                        {INDIAN_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
+                    <label className="text-sm text-gray-600 mb-1 block">State</label>
+                    <Select value={formData.state} onValueChange={(value) => handleInputChange('state', value)}>
+                      <SelectTrigger className="border-0 border-b border-gray-300 rounded-none">
+                        <SelectValue placeholder="Select State" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60">
+                        {INDIAN_STATES.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Teaching Details */}
+              <div className="mb-8">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">Teaching Details</h3>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="text-sm text-gray-600 mb-1 block">Primary Subject</label>
+                    <input
+                      type="text"
+                      value={formData.primarySubject}
+                      onChange={(e) => handleInputChange('primarySubject', e.target.value)}
+                      placeholder="e.g., Mathematics"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600 mb-1 block">Secondary Subjects</label>
+                    <input
+                      type="text"
+                      value={formData.secondarySubjects}
+                      onChange={(e) => handleInputChange('secondarySubjects', e.target.value)}
+                      placeholder="e.g., Physics, Chemistry"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600 mb-1 block">Experience (Years)</label>
+                    <input
+                      type="text"
+                      value={formData.experience}
+                      onChange={(e) => handleInputChange('experience', e.target.value)}
+                      placeholder="e.g., 5"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm text-gray-600 mb-1 block">Qualification</label>
+                    <input
+                      type="text"
+                      value={formData.qualification}
+                      onChange={(e) => handleInputChange('qualification', e.target.value)}
+                      placeholder="e.g., B.Ed, M.Sc"
+                      className="w-full border-0 border-b border-gray-300 rounded-none px-0 py-2 focus:outline-none focus:border-[#6C5DD3] text-gray-900 bg-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-600 mb-1 block">Teaching Mode</label>
+                    <Select value={formData.teachingMode} onValueChange={(value) => handleInputChange('teachingMode', value)}>
                       <SelectTrigger className="border-0 border-b border-gray-300 rounded-none">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="India">India</SelectItem>
-                        <SelectItem value="USA">USA</SelectItem>
-                        <SelectItem value="UK">UK</SelectItem>
+                        <SelectItem value="Online">Online</SelectItem>
+                        <SelectItem value="Offline">Offline</SelectItem>
+                        <SelectItem value="Hybrid">Hybrid</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -256,13 +481,12 @@ const TeacherProfileEdit = () => {
               {/* About Me */}
               <div className="mb-8">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase mb-4">About Me</h3>
-                <Textarea
-                  name="about"
+                <textarea
                   value={formData.about}
-                  onChange={handleInputChange}
-                  placeholder="Tell about you"
+                  onChange={(e) => handleInputChange('about', e.target.value)}
+                  placeholder="Tell about yourself, your teaching philosophy, and experience..."
                   rows={4}
-                  className="rounded-xl border-gray-300 focus:border-[#6C5DD3]"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:border-[#6C5DD3] text-gray-900 resize-none"
                 />
               </div>
 
@@ -270,24 +494,40 @@ const TeacherProfileEdit = () => {
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase">Skills</h3>
-                  <button className="flex items-center gap-2 text-[#6C5DD3] text-sm font-semibold hover:underline">
+                  <button 
+                    onClick={addNewSkill}
+                    className="flex items-center gap-2 text-[#6C5DD3] text-sm font-semibold hover:underline"
+                  >
                     <Plus className="w-4 h-4" />
-                    Add New Skills
+                    Add New Skill
                   </button>
                 </div>
                 <div className="space-y-4">
                   {skills.map((skill, index) => (
-                    <div key={index}>
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-700 font-medium">{skill.name}</span>
-                        <span className="text-gray-500 font-semibold">{skill.level}%</span>
+                    <div key={index} className="relative">
+                      <div className="flex justify-between items-center text-sm mb-2">
+                        <input
+                          type="text"
+                          value={skill.name}
+                          onChange={(e) => handleSkillChange(index, 'name', e.target.value)}
+                          className="text-gray-700 font-medium bg-transparent border-0 focus:outline-none focus:border-b focus:border-[#6C5DD3]"
+                        />
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-500 font-semibold">{skill.level}%</span>
+                          <button
+                            onClick={() => removeSkill(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
                       <input
                         type="range"
                         min="0"
                         max="100"
                         value={skill.level}
-                        onChange={(e) => handleSkillChange(index, parseInt(e.target.value))}
+                        onChange={(e) => handleSkillChange(index, 'level', parseInt(e.target.value))}
                         className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#6C5DD3]"
                         style={{
                           background: `linear-gradient(to right, #6C5DD3 0%, #6C5DD3 ${skill.level}%, #E5E7EB ${skill.level}%, #E5E7EB 100%)`
@@ -300,11 +540,20 @@ const TeacherProfileEdit = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-end gap-4">
-                <Button variant="outline" className="rounded-xl px-8">
+                <Button 
+                  variant="outline" 
+                  className="rounded-xl px-8"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleSave} className="rounded-xl px-8 bg-[#6C5DD3] hover:bg-[#5B4CC2]">
-                  Save Changes
+                <Button 
+                  onClick={handleSave} 
+                  className="rounded-xl px-8 bg-[#6C5DD3] hover:bg-[#5B4CC2]"
+                  disabled={isSaving}
+                >
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </div>

@@ -225,7 +225,7 @@ const TeacherJobsPanel = () => {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">
-                                                {job.school?.institutionName || "School Name"}
+                                                {job.companyName || "School Name"}
                                             </p>
                                         </div>
                                     </div>
@@ -238,22 +238,24 @@ const TeacherJobsPanel = () => {
 
                                 {/* Salary */}
                                 <p className="text-xl font-bold text-gray-800 mb-3">
-                                    {job.salary ? `₹${job.salary.toLocaleString()}` : "$14,000 - $25,000"}
+                                    {job.salaryRange?.min && job.salaryRange?.max 
+                                        ? `₹${parseInt(job.salaryRange.min).toLocaleString()} - ₹${parseInt(job.salaryRange.max).toLocaleString()}`
+                                        : "Salary not specified"}
                                 </p>
 
                                 {/* Description */}
                                 <p className="text-sm text-gray-500 line-clamp-3 mb-4 leading-relaxed">
-                                    {job.description || "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."}
+                                    {job.description || "No description provided"}
                                 </p>
 
                                 {/* Job Type Badge and Location */}
                                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                                     <span className="px-4 py-1.5 bg-[#6C5DD3] bg-opacity-10 text-[#6C5DD3] rounded-lg text-xs font-semibold uppercase">
-                                        {job.jobType || "REMOTE"}
+                                        {job.jobType || "Not specified"}
                                     </span>
                                     <p className="text-sm text-gray-500 flex items-center gap-1">
                                         <MapPin className="w-4 h-4" />
-                                        {job.school?.city || "London, England"}
+                                        {job.location?.city || "Location not specified"}
                                     </p>
                                 </div>
                             </div>

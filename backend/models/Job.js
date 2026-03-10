@@ -3,8 +3,11 @@ import { Schema, model } from "mongoose";
 const jobSchema = new Schema({
   company: {
     type: Schema.Types.ObjectId,
-    ref: "Company",
+    ref: "User", // Changed from Company to User since schools are users
     required: true,
+  },
+  companyName: {
+    type: String,
   },
   postedBy: {
     type: Schema.Types.ObjectId,
@@ -13,6 +16,9 @@ const jobSchema = new Schema({
   },
   title: { type: String, required: true },
   description: { type: String, required: true },
+  requirements: [{ type: String }],
+  responsibilities: [{ type: String }],
+  benefits: [{ type: String }],
   location: {
     city: { type: String, required: true },
     state: { type: String },
@@ -21,6 +27,7 @@ const jobSchema = new Schema({
   salaryRange: {
     min: { type: String },
     max: { type: String },
+    currency: { type: String, default: "INR" },
   },
   tags: [{ type: String }],
   socials: {
@@ -31,29 +38,32 @@ const jobSchema = new Schema({
   frequency: {
     type: String,
     enum: ["hourly", "monthly", "yearly"],
-    required: true,
-    default: "yearly",
+    default: "monthly",
   },
+  subject: { type: String },
   skillsRequired: { type: String },
   postedAt: { type: Date, default: Date.now },
   applicants: [{ type: Schema.Types.ObjectId, ref: "Application" }],
   status: { type: String, enum: ["open", "closed"], default: "open" },
   jobType: {
     type: String,
-    enum: ["full time", "part time", "internship"],
+    enum: ["full-time", "part-time", "contract", "substitute"],
     required: true,
-    default: "full time",
+    default: "full-time",
   },
   workFrom: {
     type: String,
     enum: ["remote", "on-site", "hybrid"],
     default: "on-site",
   },
+  workingHours: { type: String },
   experience: {
     type: String,
-    enum: ["entry-level", "mid-level", "senior-level"],
     required: true,
   },
+  applicationDeadline: { type: Date },
+  startDate: { type: Date },
+  classLevels: [{ type: String }],
 });
 
 export default model("Job", jobSchema);

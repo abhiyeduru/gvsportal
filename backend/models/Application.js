@@ -12,6 +12,10 @@ const applicationSchema = new Schema({
     enum: ["applied", "reviewing", "interview", "hired", "rejected"],
     default: "applied",
   },
+  coverLetter: { type: String },
+  expectedSalary: { type: Number },
+  availableFrom: { type: Date },
+  resume: { type: String }, // URL to uploaded resume
   appliedAt: { type: Date, default: Date.now },
 });
 

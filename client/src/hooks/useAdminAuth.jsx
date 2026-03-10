@@ -25,7 +25,7 @@ export const AdminAuthProvider = ({ children }) => {
       }
 
       axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const response = await axiosInstance.get('/api/admin/me');
+      const response = await axiosInstance.get('/admin/me');
       
       if (response.data.success) {
         setAdmin(response.data.admin);
@@ -41,7 +41,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await axiosInstance.post('/api/admin/login', credentials);
+      const response = await axiosInstance.post('/admin/login', credentials);
       
       if (response.data.success) {
         const { admin, accessToken } = response.data;
@@ -61,7 +61,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axiosInstance.post('/api/admin/logout');
+      await axiosInstance.post('/admin/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

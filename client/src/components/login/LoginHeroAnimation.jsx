@@ -68,18 +68,17 @@ const LoginHeroAnimation = () => {
             transform: `translate(${mousePosition.x * 5}px, ${mousePosition.y * 5}px)`,
           }}
         >
-          {/* GravITy Cloud Logo */}
+          {/* Logo Image */}
           <motion.div
             className="mb-8 flex justify-center"
             initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             transition={{ duration: 1.5, delay: 0.3 }}
           >
-            <motion.svg 
-              width="120" 
-              height="120" 
-              viewBox="0 0 400 400" 
-              className="drop-shadow-2xl"
+            <motion.img
+              src="/Icons/WhatsApp Image 2026-03-08 at 16.29.15.jpeg"
+              alt="GravITy Logo"
+              className="w-32 h-32 object-contain drop-shadow-2xl rounded-2xl"
               animate={{ 
                 rotate: [0, 5, -5, 0],
                 scale: [1, 1.05, 1]
@@ -89,71 +88,7 @@ const LoginHeroAnimation = () => {
                 repeat: Infinity, 
                 ease: "easeInOut" 
               }}
-            >
-              {/* Tree trunk/stem */}
-              <motion.rect 
-                x="190" 
-                y="280" 
-                width="20" 
-                height="60" 
-                fill="white" 
-                opacity="0.9"
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{ duration: 0.8, delay: 1 }}
-              />
-              
-              {/* Leaves */}
-              <motion.ellipse 
-                cx="160" 
-                cy="200" 
-                rx="15" 
-                ry="25" 
-                fill="white" 
-                opacity="0.8" 
-                transform="rotate(-30 160 200)"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-              />
-              <motion.ellipse 
-                cx="240" 
-                cy="200" 
-                rx="15" 
-                ry="25" 
-                fill="white" 
-                opacity="0.8" 
-                transform="rotate(30 240 200)"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.6, delay: 1.4 }}
-              />
-              
-              {/* Main cloud/tree shape */}
-              <motion.ellipse 
-                cx="200" 
-                cy="180" 
-                rx="120" 
-                ry="100" 
-                fill="white" 
-                opacity="0.9"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 1, delay: 0.8 }}
-              />
-              
-              {/* Grass/roots at bottom */}
-              <motion.path 
-                d="M 120 320 Q 130 310 140 320 Q 150 310 160 320 Q 170 310 180 320 Q 190 310 200 320 Q 210 310 220 320 Q 230 310 240 320 Q 250 310 260 320 Q 270 310 280 320" 
-                stroke="white" 
-                strokeWidth="3" 
-                fill="none" 
-                opacity="0.7"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 1.5, delay: 1.6 }}
-              />
-            </motion.svg>
+            />
           </motion.div>
 
           <motion.h1

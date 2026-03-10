@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,10 +16,11 @@ import {
   MessageCircle,
   Mail,
   MapPin,
-  Globe
+  Globe,
+  Loader2
 } from 'lucide-react';
 
-const SchoolProfileForm = ({ profileData, onInputChange, onSave, onCancel }) => {
+const SchoolProfileForm = ({ profileData, onInputChange, onSave, onCancel, isSaving }) => {
   const indianStates = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
     'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
@@ -84,14 +85,22 @@ const SchoolProfileForm = ({ profileData, onInputChange, onSave, onCancel }) => 
             />
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={onCancel}>
+            <Button variant="outline" onClick={onCancel} disabled={isSaving}>
               Cancel
             </Button>
             <Button 
               onClick={onSave}
+              disabled={isSaving}
               className="bg-gradient-to-r from-[#6C5CE7] to-[#5A4FCF] hover:from-[#5A4FCF] hover:to-[#4C46D6] text-white"
             >
-              Save Changes
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </div>

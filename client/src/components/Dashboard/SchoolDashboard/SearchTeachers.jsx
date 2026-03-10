@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SchoolLayout from './SchoolLayout';
 import { 
   Search, 
@@ -14,6 +15,7 @@ import {
 } from 'lucide-react';
 
 const SearchTeachers = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedExperience, setSelectedExperience] = useState('');
@@ -279,7 +281,10 @@ const SearchTeachers = () => {
 
               {/* Action Buttons */}
               <div className="flex space-x-2">
-                <button className="flex-1 bg-[#6C5CE7] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5A4FCF] transition-colors">
+                <button 
+                  onClick={() => navigate(`/dashboard/school/teacher/${teacher.id}`)}
+                  className="flex-1 bg-[#6C5CE7] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#5A4FCF] transition-colors"
+                >
                   View Profile
                 </button>
                 <button className="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">

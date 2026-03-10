@@ -28,7 +28,15 @@ const Login = () => {
     loginUser(credentials, {
       onSuccess: (data) => {
         toast.success("Login Success!");
-        navigate(`/dashboard/${data?.user?.role}`);
+        // Map backend roles to frontend routes
+        const roleMap = {
+          jobSeeker: "teacher",
+          recruiter: "school",
+          parent: "parent",
+          admin: "admin"
+        };
+        const effectiveRole = roleMap[data?.user?.role] || data?.user?.role;
+        navigate(`/dashboard/${effectiveRole}`);
       },
       onError: (error) => {
         toast.error("Error Loggin In!", { description: error.message });

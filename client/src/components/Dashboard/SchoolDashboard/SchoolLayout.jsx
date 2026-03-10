@@ -52,8 +52,8 @@ const SchoolLayout = ({ children }) => {
       {/* Sidebar - Exact match to design */}
       <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-0'
-        } bg-gradient-to-b from-[#6C5CE7] to-[#5A4FCF] text-white transition-all duration-300 flex flex-col fixed lg:sticky top-0 h-screen z-50 overflow-hidden`}
+          sidebarOpen ? 'w-64' : 'w-20'
+        } bg-gradient-to-b from-[#6C5CE7] to-[#5A4FCF] text-white transition-all duration-300 flex flex-col h-screen sticky top-0 z-50`}
       >
         {/* Logo Section */}
         <div className="p-6 mt-4">
@@ -116,7 +116,7 @@ const SchoolLayout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Navigation Bar */}
         <header className="bg-white h-20 shadow-sm flex items-center justify-between px-6 sticky top-0 z-40">
           {/* Left Section */}
@@ -225,14 +225,6 @@ const SchoolLayout = ({ children }) => {
           {children}
         </main>
       </div>
-
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 };

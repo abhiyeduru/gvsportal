@@ -35,20 +35,72 @@ const userSchema = new Schema({
   inviteCodeUsed: { type: Schema.Types.ObjectId, ref: "InviteCode" },
   verificationToken: { type: String },
 
+  // Profile completion tracking
+  profileCompleted: { type: Boolean, default: false },
+  
   // Reference to profile schema
   profilePic: { type: String },
   yoe: { type: String },
   fullName: { type: String },
   bio: { type: String },
   contact: { type: String },
+  whatsappNumber: { type: String },
   contactEmail: { type: String },
   designation: { type: String },
   address: { type: String },
-  skills: [{ type: String }],
+  aadhaarNumber: { type: String },
+  skills: [
+    {
+      name: { type: String },
+      level: { type: Number, default: 50 }
+    }
+  ],
   profileLinks: {
     linkedIn: { type: String },
     github: { type: String },
+    youtube: { type: String },
+    website: { type: String },
+    portfolio: { type: String },
   },
+
+  // Teacher-specific fields
+  primarySubject: { type: String },
+  secondarySubjects: [{ type: String }],
+  city: { type: String },
+  state: { type: String },
+  qualification: { type: String },
+  rating: { type: Number, default: 0 },
+  totalReviews: { type: Number, default: 0 },
+  hourlyRate: { type: String },
+  availableForHire: { type: Boolean, default: true },
+  specializations: [{ type: String }],
+  languages: [{ type: String }],
+  teachingMode: { type: String, enum: ['Online', 'Offline', 'Hybrid'], default: 'Hybrid' },
+  studentsTaught: { type: Number, default: 0 },
+  successRate: { type: Number, default: 0 },
+  classesCompleted: { type: Number, default: 0 },
+  achievements: [{ type: String }],
+
+  // Parent-specific fields
+  childGrade: { type: String },
+  childName: { type: String },
+  preferredSubjects: [{ type: String }],
+  preferredTeachingMode: { type: String, enum: ['Online', 'Offline', 'Hybrid'] },
+
+  // School/Institution-specific fields
+  institutionType: { type: String },
+  boardAffiliation: { type: String },
+  yearEstablished: { type: String },
+  institutionSize: { type: String },
+  hrContactPerson: { type: String },
+  whatsapp: { type: String },
+  facilities: [{ type: String }],
+  subjectsHiring: [{ type: String }],
+  requiredQualifications: { type: String },
+  minimumExperience: { type: String },
+  currentlyHiring: { type: Boolean, default: false },
+  schoolRegistrationNumber: { type: String },
+  principalName: { type: String },
 
   companies: [{ type: Schema.Types.ObjectId, ref: "Company" }],
   // Array of references to project schema
